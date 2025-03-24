@@ -2,6 +2,7 @@
 #include<vector>
 #include<fstream>
 #include<string>
+#include<queue>
 using namespace std;
 
 void string_letter_check(string str, uint16_t command, string name);
@@ -11,6 +12,9 @@ int letter_find(string name, char letter);
 bool isR16_R31(string name);
 bool isplus1(string comand);
 void sign_check(int16_t& number, string code);
+string get_queue_element(void);
+uint16_t get_comand(void);
+void comands_double_byte(uint16_t comand);
 
 struct comand {
 	string name;
@@ -19,45 +23,18 @@ struct comand {
 	int clear_mask;
 };
 
+vector<comand> get_comands_vector(string database_name);
+queue<string> hexcomand;
+
 int main(void)
 {
-	vector<string> hex;
-	hex.push_back("0000");
+	hexcomand.push("3D9A");
+	hexcomand.push("0C94");
+	hexcomand.push("3400");
 
-	vector<comand> comands;
+	vector<comand> comands = get_comands_vector("database_one_byte.txt");
 
-
-	string name;
-	string code;
-	uint16_t mask = 0;
-	uint16_t clear_mask = 0;
-
-	ifstream file("database.txt");
-	while (file >> name >> code >> mask >> clear_mask)
-		comands.push_back({ name, code, mask, clear_mask });
-	file.close();
-
-	string str = hex[0];
-	unsigned char b;
-
-	for (int i = 0; i < 2; i++)
-	{
-		b = str[0];
-		for (int j = 1; j < 4; j++)
-			str[j - 1] = str[j];
-		str[3] = b;
-	}
-
-	uint16_t comand = 0;
-
-	for (int i = 0; i < 4; i++)
-	{
-		if (str[i] >= '0' && str[i] <= '9') 
-			b = str[i] - '0';
-		else
-			b = str[i] - ('A' - 0x0A);
-		comand = (comand << 4) | b;
-	}
+	uint16_t comand = get_comand();
 
 	for (int i = 0; i < 120; i++)
 	{
@@ -66,6 +43,8 @@ int main(void)
 			string_letter_check(comands[i].code, comand, comands[i].name);
 			break;
 		}
+		if (i == 119)
+			comands_double_byte(comand);
 	}
 
 
@@ -166,4 +145,66 @@ void sign_check(int16_t& number, string code)
 		if (number & (1 << 6))
 			number |= 0xFF80;
 	}
+}
+
+string get_queue_element(void)
+{
+	string ans = hexcomand.front(); 
+	hexcomand.pop();
+	return ans;
+}
+
+uint16_t get_comand(void)
+{
+	string str = get_queue_element();
+
+	unsigned char b;
+
+	for (int i = 0; i < 2; i++)
+	{
+		b = str[0];
+		for (int j = 1; j < 4; j++)
+			str[j - 1] = str[j];
+		str[3] = b;
+	}
+
+	uint16_t comand = 0;
+
+	for (int i = 0; i < 4; i++)
+	{
+		if (str[i] >= '0' && str[i] <= '9')
+			b = str[i] - '0';
+		else
+			b = str[i] - ('A' - 0x0A);
+		comand = (comand << 4) | b;
+	}
+	
+	return comand;
+}
+
+vector<comand> get_comands_vector(string database_name)
+{
+	vector<comand> comands;
+	string name; 
+	string code; 
+	uint16_t mask = 0; 
+	uint16_t clear_mask = 0;
+	
+	ifstream file(database_name);
+	
+	while (file >> name >> code >> mask >> clear_mask)
+		comands.push_back({ name, code, mask, clear_mask });
+	file.close();
+
+	return comands;
+}
+
+void comands_double_byte(uint16_t comand16)
+{
+	uint32_t comand32 = (comand16 << 16);
+	comand16 = get_comand();
+	comand32 |= comand16;
+
+	vector<comand> comands;
+
 }

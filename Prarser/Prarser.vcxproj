@@ -130,7 +130,8 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="database.txt" />
+    <Text Include="database_double_byte.txt" />
+    <Text Include="database_one_byte.txt" />
     <Text Include="database_alpha.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
