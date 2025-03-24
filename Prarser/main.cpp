@@ -15,12 +15,14 @@ void sign_check(int16_t& number, string code);
 string get_queue_element(void);
 uint16_t get_comand(void);
 void comands_double_byte(uint16_t comand);
+int letter_number(string code, char letter, uint32_t command32);
+void name_output(string name);
 
 struct comand {
 	string name;
 	string code;
-	int mask;
-	int clear_mask;
+	uint32_t mask;
+	uint32_t clear_mask;
 };
 
 vector<comand> get_comands_vector(string database_name);
@@ -28,9 +30,9 @@ queue<string> hexcomand;
 
 int main(void)
 {
-	hexcomand.push("3D9A");
-	hexcomand.push("0C94");
-	hexcomand.push("3400");
+	//hexcomand.push("3D9A");
+	hexcomand.push("0E94");
+	hexcomand.push("4000");
 
 	vector<comand> comands = get_comands_vector("database_one_byte.txt");
 
@@ -55,6 +57,7 @@ void string_letter_check(string code, uint16_t command, string name)
 {
 	bool plus16 = isR16_R31(name);
 	bool plus1 = isplus1(name);
+
 	vector<char> letters;
 	for (int j = 15; j >= 0; j--)
 	{
@@ -64,13 +67,8 @@ void string_letter_check(string code, uint16_t command, string name)
 			name_change(name, code[j], letter_number(code, code[j], command, plus16, plus1));
 		}
 	}
-	int name_space = name.find('_');
-	if (name_space != string::npos)
-	{
-		name.erase(name_space, 1);
-		name.insert(name_space, " ");
-	}
-	cout << name;
+
+	name_output(name);
 }
 
 int letter_number(string code, char letter, uint16_t command, bool plus16, bool plus1)
@@ -187,8 +185,8 @@ vector<comand> get_comands_vector(string database_name)
 	vector<comand> comands;
 	string name; 
 	string code; 
-	uint16_t mask = 0; 
-	uint16_t clear_mask = 0;
+	uint32_t mask = 0; 
+	uint32_t clear_mask = 0; 
 	
 	ifstream file(database_name);
 	
@@ -199,12 +197,60 @@ vector<comand> get_comands_vector(string database_name)
 	return comands;
 }
 
+int letter_number(string code, char letter, uint32_t command32)
+{
+	uint32_t number = 0;
+	uint16_t counter = 0;
+	for (int i = 31; i > 0; i--)
+	{
+		if (code[i] == letter)
+		{
+			counter++;
+			if (command32 & (1 << (31 - i)))
+				number |= (1 << (counter - 1));
+		}
+	}
+
+	return number * 2;
+}
+
 void comands_double_byte(uint16_t comand16)
 {
 	uint32_t comand32 = (comand16 << 16);
 	comand16 = get_comand();
 	comand32 |= comand16;
 
-	vector<comand> comands;
+	vector<comand> comands = get_comands_vector("database_double_byte.txt");
 
+	for (int i = 0; i < 4; i++)
+	{
+		if (comands[i].mask == (comand32 & comands[i].clear_mask))
+		{
+			string code = comands[i].code;
+			string name = comands[i].name;
+			vector<char> letters;
+			for (int j = 31; j >= 0; j--)
+			{
+				if (code[j] != '0' && code[j] != '1' && (find(letters.begin(), letters.end(), code[j]) == end(letters)))
+				{
+					letters.push_back(code[j]);
+					name_change(name, code[j], letter_number(code, code[j], comand32));
+					name_output(name);
+				}
+			}
+
+		}
+
+	}
+}
+
+void name_output(string name)
+{
+	int name_space = name.find('_');
+	if (name_space != string::npos)
+	{
+		name.erase(name_space, 1);
+		name.insert(name_space, " ");
+	}
+	cout << name;
 }
