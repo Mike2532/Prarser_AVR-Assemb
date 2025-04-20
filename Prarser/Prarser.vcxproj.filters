@@ -29,5 +29,14 @@
     <Text Include="database_double_byte.txt">
       <Filter>Файлы ресурсов</Filter>
     </Text>
+    <Text Include="database_one_byte_sorted.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="Code.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="Code2.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
   </ItemGroup>
 </Project>

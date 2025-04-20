@@ -1,4 +1,4 @@
-"add Rd,Rr"
+﻿"add Rd,Rr"
 "adc Rd,Rr"
 "adiw Rdl,K"
 "sub Rd,Rr"
@@ -497,3 +497,28 @@
 0b0000000000000000
 0b1001010110001000
 0b1001010110101000
+
+
+
+  WHILE (T <> -1) AND (T <> -2)
+  DO 
+    BEGIN
+      IF (Counter > MAXINT + 1) OR (T > MAXINT - Totalsum )
+      THEN
+        BEGIN
+          Counter := -1;
+          WRITELN('Êðèòè÷åñêàÿ îøèáêà: ïåðåïîëíåíèå ïðè âû÷èñëåíèè ñðåäíåãî àðèôìåòè÷åñêîãîþ. Áóäóò âûâåäåíû òîëüêî ìàêñèìàëüíûå è ìèíèìàëüíûå çíà÷åíèÿ')
+        END
+       ELSE
+         BEGIN 
+          Counter := Counter + 1;
+          Totalsum := Totalsum + T;  
+         END; 
+      IF T < Mini
+      THEN
+        Mini := T;
+      IF T > Maxi
+      THEN
+        Maxi := T;    
+      T := ReadNumber()  
+    END;
