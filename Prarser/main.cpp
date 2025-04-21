@@ -17,6 +17,7 @@ uint16_t get_comand(void);
 void comands_double_byte(uint16_t comand);
 int letter_number(string code, char letter, uint32_t command32);
 void name_output(string name);
+void queue_initialize(string database);
 
 struct comand {
 	string name;
@@ -30,23 +31,7 @@ queue<string> hexcomand;
 
 int main(void)
 {
-	fstream infile("Code2.txt");
-	string line;
-	string qelem = "";
-	int comcounter = 0;
-	while (getline(infile, line))
-	{
-		comcounter++;
-		for (int i = 9; i < line.size() - 2; i++)
-		{
-			qelem += line[i];
-			if (i % 4 == 0)
-			{
-				hexcomand.push(qelem);
-				qelem = "";
-			}
-		}
-	}
+	queue_initialize("Code2.txt");
 
 	vector<comand> comands = get_comands_vector("database_one_byte_sorted.txt");
 
@@ -139,7 +124,6 @@ void string_letter_check(string code, uint16_t command, string name)
 	name_output(name);
 }
 
-
 int letter_number(string code, char letter, uint16_t command, bool plus16, bool plus1)
 {
 	int16_t number = 0;
@@ -190,7 +174,6 @@ void name_output(string name)
 	cout << name << endl;
 }
 
-
 bool isR16_R31(string name)
 {
 	vector<string> changed = { "ldi_Rd,K", "andi_Rd,K", "ori_Rd,K", "subi_Rd,K", "sbci_Rd,K", "cbr_Rd,K", "ser_Rd", "!"};
@@ -225,8 +208,6 @@ void sign_check(int16_t& number, string code)
 			number |= 0xFF80;
 	}
 }
-
-
 
 int letter_number(string code, char letter, uint32_t command32)
 {
@@ -272,5 +253,24 @@ void comands_double_byte(uint16_t comand16)
 
 		}
 
+	}
+}
+
+void queue_initialize(string database)
+{
+	fstream infile(database);
+	string line;
+	string qelem = "";
+	while (getline(infile, line))
+	{
+		for (int i = 9; i < line.size() - 2; i++)
+		{
+			qelem += line[i];
+			if (i % 4 == 0)
+			{
+				hexcomand.push(qelem);
+				qelem = "";
+			}
+		}
 	}
 }
